@@ -6,11 +6,19 @@ require('dotenv').config()
 
 const app = express()
 app.use(express.json())
+
+//const {authenticate} = require('./middleware/authen')
+//app.use(authenticate)
+
 app.use((req,res,next)=>{
     console.log('Middleware before routes'),
     next()
 })
+
+
+
 const {NOT_FOUND_MSG, BAD_REQUEST} = require('./constant')
+
 
 const products = [
     {
@@ -83,6 +91,9 @@ app.get('*',(req,res)=>{
     res.status(404).send(NOT_FOUND_MSG)
 })
 
+app.post('/',(req,res)=>{
+    res.send('OK')
+})
 app.post('/api/v1/products',(req,res)=>{
     const {name,size,section,color} = req.body
    /* const data = {
