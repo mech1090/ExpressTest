@@ -1,9 +1,10 @@
 const express  = require('express')
+const Validator = require('validatorjs')
 require('dotenv').config()
 
 const app = express()
 app.use(express.json())
-const {NOT_FOUND_MSG} = require('./constant')
+const {NOT_FOUND_MSG, BAD_REQUEST} = require('./constant')
 
 const products = [
     {
@@ -78,6 +79,22 @@ app.get('*',(req,res)=>{
 
 app.post('/api/v1/products',(req,res)=>{
     const {name,size,section,color} = req.body
+    const data = {
+        name,
+        section,
+        size,
+        color
+
+    }
+    const rules = {
+        name : 'required',
+        section: ['required',{in:['kids','adults']}],
+        size : ['required',{in:['s','m','l']}],
+        color : 'required'
+    }
+    validator = new Validator(data,rules)
+    if(validator.fails()) return res.status(400).send(validator.errors)
+    
     const product = {
         id : products.length + 1,
         name,section,size,color  
