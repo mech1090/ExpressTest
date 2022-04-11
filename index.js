@@ -1,9 +1,15 @@
 const express  = require('express')
+const req = require('express/lib/request')
 const Validator = require('validatorjs')
+const Joi = require('joi')
 require('dotenv').config()
 
 const app = express()
 app.use(express.json())
+app.use((req,res,next)=>{
+    console.log('Middleware before routes'),
+    next()
+})
 const {NOT_FOUND_MSG, BAD_REQUEST} = require('./constant')
 
 const products = [
@@ -79,21 +85,32 @@ app.get('*',(req,res)=>{
 
 app.post('/api/v1/products',(req,res)=>{
     const {name,size,section,color} = req.body
-    const data = {
+   /* const data = {
         name,
         section,
         size,
         color
 
-    }
-    const rules = {
+    }*/
+    const data = req.body
+
+    const productschema = Joi.object({
+        name : Joi.string().min(3).max(512).required(),
+        section : Joi.string().valid('kids','adults').required(),
+        size : Joi.string().valid('s','m','l').required(),
+        color : Joi.string().required()
+    })
+
+    const{error,value} = productschema.validate(data)
+    if(error) return res.status(400).send(error.details[0].message)
+ /*   const rules = {
         name : 'required',
         section: ['required',{in:['kids','adults']}],
         size : ['required',{in:['s','m','l']}],
         color : 'required'
     }
     validator = new Validator(data,rules)
-    if(validator.fails()) return res.status(400).send(validator.errors)
+    if(validator.fails()) return res.status(400).send(validator.errors)*/
     
     const product = {
         id : products.length + 1,
